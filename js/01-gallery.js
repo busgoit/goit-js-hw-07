@@ -16,10 +16,6 @@ const galleryMarkup = galeryItemsArr => {
   return galeryItemsArr.map(galleryElTemplate).join('');
 };
 
-const renderGallery = galleryArr => {
-  gallery.innerHTML = galleryMarkup(galleryArr);
-};
-
 let modalWindow;
 
 const closeModalWindowByEscKeyPress = event => {
@@ -27,18 +23,16 @@ const closeModalWindowByEscKeyPress = event => {
   const isEscKey = event.code === ESC_KEY_CODE;
 
   if (isEscKey) {
-    modalWindow.close({
-      onClose: window.removeEventListener('keydown', closeModalWindowByEscKeyPress),
-    });
+    modalWindow.close();
   }
 };
 
 const onModalWindowByGalleryElementClick = event => {
   event.preventDefault();
 
-  const isOnImgClick = event.target.nodeName === 'IMG';
+  const isImgClick = event.target.nodeName === 'IMG';
 
-  if (!isOnImgClick) {
+  if (!isImgClick) {
     return;
   }
 
@@ -50,11 +44,18 @@ const onModalWindowByGalleryElementClick = event => {
     <img src="${imgSource}" alt="${imgDescription}"/>
   </div>`;
 
-  modalWindow = basicLightbox.create(modalWindowTemplate);
+  modalWindow = basicLightbox.create(modalWindowTemplate, {
+    onShow: modalWindow => {
+      window.addEventListener('keydown', closeModalWindowByEscKeyPress);
+    },
+    onClose: modalWindow => {
+      window.removeEventListener('keydown', closeModalWindowByEscKeyPress);
+    },
+  });
 
-  modalWindow.show({ onShow: window.addEventListener('keydown', closeModalWindowByEscKeyPress) });
+  modalWindow.show();
 };
 
-renderGallery(galleryItems);
+gallery.insertAdjacentHTML('beforeend', galleryMarkup(galleryItems));
 
 gallery.addEventListener('click', onModalWindowByGalleryElementClick);
